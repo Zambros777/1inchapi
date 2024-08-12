@@ -1,8 +1,39 @@
-const express = require("express");
+import express from "express";
+import request from "request";
+
 const app = express();
+const port = 3000;
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 app.get("/", (req, res) => res.send("Express on Vercel"));
 
-app.listen(3000, () => console.log("Server ready on port 3000."));
+app.get("/api/crypto", (req, res) => {
+  const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${req.query.symbol}&convert=${req.query.convert}`;
+  request(
+    {
+      url: url,
+      headers: {
+        "X-CMC_PRO_API_KEY": "73123050-db8f-430f-9815-0ea4367ced21",
+      },
+    },
+    (error, response, body) => {
+      if (error) {
+        res.status(500).send(error);
+      } else {
+        res.send(body);
+      }
+    }
+  );
+});
 
-module.exports = app;
+app.listen(port, () => {
+  console.log(`Proxy server is running at http://localhost:${port}`);
+});
