@@ -32,7 +32,7 @@ app.get("/api/crypto", (req, res) => {
     {
       url: url,
       headers: {
-        "X-CMC_PRO_API_KEY": "48d81810-7c07-454d-a289-436eeb9e9743",
+        "X-CMC_PRO_API_KEY": "73123050-db8f-430f-9815-0ea4367ced21",
       },
     },
     (error, response, body) => {
