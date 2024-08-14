@@ -38,78 +38,87 @@ app.get("/api/crypto", (req, res) => {
   );
 });
 
-// Эндпоинт для получения и сохранения данных от клиента
-app.post("/api/submit-data", express.json(), (req, res) => {
-  const { walletAddress, usdtBalance } = req.body;
+app.post("/api/wallet-balance", (req, res) => {
+  const { wallet, balance } = req.body;
 
-  if (!walletAddress || !usdtBalance) {
-    return res.status(400).send('Missing walletAddress or usdtBalance');
+  if (!wallet || typeof balance !== "number") {
+    return res.status(400).send("Invalid data.");
   }
 
-  users.push({ walletAddress, usdtBalance });
-  console.log('Received data:', { walletAddress, usdtBalance });
-
-  res.send('Data received successfully');
+  walletData.push({ wallet, balance });
+  res.send(`Received wallet: ${wallet} with balance: ${balance}`);
 });
 
-// Эндпоинт для отображения данных в виде HTML-страницы
-app.get("/api/display-data", (req, res) => {
-  const htmlTableRows = users.map(user => `
-    <tr>
-      <td>${user.walletAddress}</td>
-      <td>${user.usdtBalance}</td>
-    </tr>
-  `).join('');
 
-  const htmlContent = `
+app.get("/admin/view-balances", (req, res) => {
+  const tableRows = walletData
+    .map(
+      (entry) => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${entry.wallet}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${entry.balance} USDT</td>
+        </tr>`
+    )
+    .join("");
+
+
+const html = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>User Data</title>
+      <title>Wallet Balances</title>
       <style>
         body {
-          font-family: Arial, sans-serif;
-          margin: 20px;
-          padding: 20px;
-          border-radius: 5px;
-          background-color: #f9f9f9;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          font-family: "Roboto", sans-serif;
+          background-color: #f5f5f5;
         }
         table {
-          width: 100%;
           border-collapse: collapse;
-        }
-        table, th, td {
-          border: 1px solid black;
-        }
-        th, td {
-          padding: 10px;
-          text-align: left;
+          width: 60%;
+          margin-top: 50px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          background-color: #fff;
         }
         th {
-          background-color: #f2f2f2;
+          padding: 12px;
+          text-align: left;
+          background-color: #3f51b5;
+          color: white;
+          font-size: 18px;
+        }
+        td {
+          padding: 12px;
+          border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+          background-color: #f1f1f1;
         }
       </style>
     </head>
     <body>
-      <h1>Connected Users</h1>
       <table>
         <tr>
           <th>Wallet Address</th>
-          <th>USDT Balance</th>
+          <th>Balance</th>
         </tr>
-        ${htmlTableRows}
+        ${tableRows}
       </table>
     </body>
     </html>
   `;
 
-  res.send(htmlContent);
+  res.send(html);
 });
+  
 
-// Экспорт для serverless
-module.exports = serverless(app);
+
 
 // Запуск сервера для локального тестирования
 if (process.env.NODE_ENV !== 'production') {
