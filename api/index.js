@@ -5,11 +5,9 @@ import serverless from "serverless-http";
 const app = express();
 const port = 3000;
 
-// Middleware для обработки JSON и URL-encoded данных
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // Middleware для обработки CORS
+app.use(express.json()); // Для обработки JSON в теле запросов
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -119,11 +117,4 @@ app.get("/admin/view-balances", (req, res) => {
   res.send(html);
 });
 
-// Запуск сервера для локального тестирования
-if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-  });
-}
-
-export const handler = serverless(app);
+export default serverless(app);
