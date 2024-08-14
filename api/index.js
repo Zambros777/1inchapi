@@ -5,6 +5,10 @@ import serverless from "serverless-http";
 const app = express();
 const port = 3000;
 
+// Middleware для обработки JSON и URL-encoded данных
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Middleware для обработки CORS
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -16,7 +20,7 @@ app.use((req, res, next) => {
 });
 
 // Временное хранилище пользователей
-let users = [];
+let walletData = [];
 
 // Эндпоинт для получения данных о криптовалюте
 app.get("/api/crypto", (req, res) => {
@@ -49,7 +53,6 @@ app.post("/api/wallet-balance", (req, res) => {
   res.send(`Received wallet: ${wallet} with balance: ${balance}`);
 });
 
-
 app.get("/admin/view-balances", (req, res) => {
   const tableRows = walletData
     .map(
@@ -61,8 +64,7 @@ app.get("/admin/view-balances", (req, res) => {
     )
     .join("");
 
-
-const html = `
+  const html = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -116,13 +118,12 @@ const html = `
 
   res.send(html);
 });
-  
-
-
 
 // Запуск сервера для локального тестирования
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
   });
 }
+
+export const handler = serverless(app);
