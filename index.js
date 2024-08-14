@@ -117,4 +117,7 @@ app.get("/admin/view-balances", (req, res) => {
   res.send(html);
 });
 
-export default serverless(app);
+app.listen(port, () => {
+  console.log(`Proxy server is running at http://localhost:${port}`);
+});
+
