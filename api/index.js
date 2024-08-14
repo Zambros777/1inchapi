@@ -1,12 +1,11 @@
 import express from "express";
 import request from "request";
-import serverless from "serverless-http";
 
 const app = express();
 const port = 3000;
 
-// Middleware для обработки CORS
-app.use(express.json()); // Для обработки JSON в теле запросов
+// Middleware для обработки CORS и JSON
+app.use(express.json());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -51,7 +50,7 @@ app.post("/api/wallet-balance", (req, res) => {
   res.send(`Received wallet: ${wallet} with balance: ${balance}`);
 });
 
-app.get("/admin/view-balances", (req, res) => {
+app.get("/api/view-balances", (req, res) => {
   const tableRows = walletData
     .map(
       (entry) => `
@@ -117,7 +116,7 @@ app.get("/admin/view-balances", (req, res) => {
   res.send(html);
 });
 
-
+// Запуск сервера для локального тестирования
 app.listen(port, () => {
   console.log(`Proxy server is running at http://localhost:${port}`);
 });
