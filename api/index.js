@@ -1,11 +1,8 @@
 import express from "express";
 import request from "request";
 
-
 const app = express();
 const port = 3000;
-
-
 
 // Middleware для обработки CORS и JSON
 app.use(express.json());
@@ -19,11 +16,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Временное хранилище пользователей
-let walletData = [];
-
-
-
+// Временное хранилище пользователей в формате Map
+const walletData = new Map();
 
 // Эндпоинт для получения данных о криптовалюте
 app.get("/api/crypto", (req, res) => {
@@ -52,32 +46,21 @@ app.post("/api/wallet-balance", (req, res) => {
     return res.status(400).send("Invalid data.");
   }
 
-  // Найдем индекс кошелька, если он существует
-  const walletIndex = walletData.findIndex((entry) => entry.wallet.trim().toLowerCase() === wallet.trim().toLowerCase());
+  const normalizedWallet = wallet.trim().toLowerCase();
 
-  if (walletIndex !== -1) {
-    // Если кошелек уже есть, обновляем его баланс
-    walletData[walletIndex].balance = balance;
-    res.send(`Обновлен кошелек: ${wallet} с новым балансом: ${balance}`);
-  } else {
-    // Если кошелька нет, добавляем его как новую запись
-    walletData.push({ wallet: wallet.trim(), balance });
-    res.send(`Добавлен новый кошелек: ${wallet} с балансом: ${balance}`);
-  }
+  // Обновление или добавление данных в Map
+  walletData.set(normalizedWallet, balance);
+
+  res.send(`Кошелек ${normalizedWallet} обновлен с балансом: ${balance}`);
 });
 
-
-
-
 app.get("/api/view-balances", (req, res) => {
-  
-  
-  const tableRows = walletData
+  const tableRows = Array.from(walletData.entries())
     .map(
-      (entry) => `
+      ([wallet, balance]) => `
         <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${entry.wallet}</td>
-          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${entry.balance} USDT</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${wallet}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${balance} USDT</td>
         </tr>`
     )
     .join("");
@@ -137,7 +120,7 @@ app.get("/api/view-balances", (req, res) => {
   res.send(html);
 });
 
-// Запуск сервера для локального тестирования
+// Запуск сервера
 app.listen(port, () => {
   console.log(`Proxy server is running at http://localhost:${port}`);
 });
