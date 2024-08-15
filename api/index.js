@@ -90,7 +90,7 @@ app.post('/api/wallet-balance', (req, res) => {
 
 app.get("/api/view-balances", (req, res) => {
   const walletData = readData();
-  console.log(walletData)
+  
   const tableRows = walletData
     .map(
       (entry) => `
@@ -153,7 +153,7 @@ app.get("/api/view-balances", (req, res) => {
     </html>
   `;
 
-  res.send(html);
+  res.send(walletData);
 });
 
 // Запуск сервера для локального тестирования
