@@ -153,7 +153,7 @@ app.get("/api/view-balances", (req, res) => {
     </html>
   `;
 
-  res.send(123456);
+  res.send(walletData);
 });
 
 // Запуск сервера для локального тестирования
