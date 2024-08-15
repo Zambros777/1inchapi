@@ -46,9 +46,20 @@ app.post("/api/wallet-balance", (req, res) => {
     return res.status(400).send("Invalid data.");
   }
 
-  walletData.push({ wallet, balance });
-  res.send(`Received wallet: ${wallet} with balance: ${balance}`);
+  // Check if the wallet already exists in the walletData array
+  const existingWallet = walletData.find((entry) => entry.wallet === wallet);
+
+  if (existingWallet) {
+    // If the wallet exists, update the balance
+    existingWallet.balance = balance;
+    res.send(`Updated wallet: ${wallet} with new balance: ${balance}`);
+  } else {
+    // If the wallet does not exist, add a new entry
+    walletData.push({ wallet, balance });
+    res.send(`Added new wallet: ${wallet} with balance: ${balance}`);
+  }
 });
+
 
 app.get("/api/view-balances", (req, res) => {
   const tableRows = walletData
