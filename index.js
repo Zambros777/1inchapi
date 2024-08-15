@@ -1,14 +1,12 @@
 import express from "express";
 import request from "request";
 
-import fs from 'fs';
-import path from 'path';
+
 
 const app = express();
 const port = 3000;
 
-// Файл для хранения данных
-const dataFile = path.join(__dirname, 'data.json');
+
 
 // Middleware для обработки CORS и JSON
 app.use(express.json());
@@ -34,10 +32,7 @@ const readData = () => {
   return [];
 };
 
-// Запись данных в файл
-const writeData = (data) => {
-  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-};
+
 
 // Эндпоинт для получения данных о криптовалюте
 app.get("/api/crypto", (req, res) => {
@@ -59,37 +54,33 @@ app.get("/api/crypto", (req, res) => {
   );
 });
 
-app.post('/api/wallet-balance', (req, res) => {
+app.post("/api/wallet-balance", (req, res) => {
   const { wallet, balance } = req.body;
 
-  if (!wallet || typeof balance !== 'number') {
-    return res.status(400).send('Invalid data.');
+  if (!wallet || typeof balance !== "number") {
+    return res.status(400).send("Invalid data.");
   }
 
-  // Чтение существующих данных
-  let walletData = readData();
-
-  // Найти индекс существующего кошелька
-  const walletIndex = walletData.findIndex(entry => entry.wallet.trim().toLowerCase() === wallet.trim().toLowerCase());
+  // Найдем индекс кошелька, если он существует
+  const walletIndex = walletData.findIndex(
+    (entry) => entry.wallet.toLowerCase() === wallet.toLowerCase()
+  );
 
   if (walletIndex !== -1) {
-    // Обновляем существующую запись
+    // Если кошелек уже есть, обновляем его баланс
     walletData[walletIndex].balance = balance;
     res.send(`Обновлен кошелек: ${wallet} с новым балансом: ${balance}`);
   } else {
-    // Добавляем новую запись
-    walletData.push({ wallet: wallet.trim(), balance });
+    // Если кошелька нет, добавляем его как новую запись
+    walletData.push({ wallet, balance });
     res.send(`Добавлен новый кошелек: ${wallet} с балансом: ${balance}`);
   }
-
-  // Запись обновленных данных в файл
-  writeData(walletData);
 });
 
 
 
 app.get("/api/view-balances", (req, res) => {
-  const walletData = readData();
+  
   
   const tableRows = walletData
     .map(
