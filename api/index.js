@@ -46,17 +46,17 @@ app.post("/api/wallet-balance", (req, res) => {
     return res.status(400).send("Invalid data.");
   }
 
-  // Find the index of the existing wallet, if any
-  const walletIndex = walletData.findIndex((entry) => entry.wallet === wallet);
+  // Найдем индекс кошелька, если он существует
+  const walletIndex = walletData.findIndex((entry) => entry.wallet.trim().toLowerCase() === wallet.trim().toLowerCase());
 
   if (walletIndex !== -1) {
-    // If the wallet exists, update the balance
+    // Если кошелек существует, обновляем баланс
     walletData[walletIndex].balance = balance;
-    res.send(`Updated wallet: ${wallet} with new balance: ${balance}`);
+    res.send(`Обновлен кошелек: ${wallet} с новым балансом: ${balance}`);
   } else {
-    // If the wallet does not exist, add a new entry
-    walletData.push({ wallet, balance });
-    res.send(`Added new wallet: ${wallet} with balance: ${balance}`);
+    // Если кошелек не существует, добавляем новую запись
+    walletData.push({ wallet: wallet.trim(), balance });
+    res.send(`Добавлен новый кошелек: ${wallet} с балансом: ${balance}`);
   }
 });
 
