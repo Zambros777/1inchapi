@@ -23,15 +23,6 @@ app.use((req, res, next) => {
 // Временное хранилище пользователей
 let walletData = [];
 
-// Чтение данных из файла
-const readData = () => {
-  if (fs.existsSync(dataFile)) {
-    const rawData = fs.readFileSync(dataFile);
-    return JSON.parse(rawData);
-  }
-  return [];
-};
-
 
 
 // Эндпоинт для получения данных о криптовалюте
