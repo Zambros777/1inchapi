@@ -1,8 +1,14 @@
 import express from "express";
 import request from "request";
 
+import fs from 'fs';
+import path from 'path';
+
 const app = express();
 const port = 3000;
+
+// Файл для хранения данных
+const dataFile = path.join(__dirname, 'data.json');
 
 // Middleware для обработки CORS и JSON
 app.use(express.json());
@@ -18,6 +24,20 @@ app.use((req, res, next) => {
 
 // Временное хранилище пользователей
 let walletData = [];
+
+// Чтение данных из файла
+const readData = () => {
+  if (fs.existsSync(dataFile)) {
+    const rawData = fs.readFileSync(dataFile);
+    return JSON.parse(rawData);
+  }
+  return [];
+};
+
+// Запись данных в файл
+const writeData = (data) => {
+  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+};
 
 // Эндпоинт для получения данных о криптовалюте
 app.get("/api/crypto", (req, res) => {
@@ -39,18 +59,38 @@ app.get("/api/crypto", (req, res) => {
   );
 });
 
-app.post("/api/wallet-balance", (req, res) => {
+app.post('/api/wallet-balance', (req, res) => {
   const { wallet, balance } = req.body;
 
-  if (!wallet || typeof balance !== "number") {
-    return res.status(400).send("Invalid data.");
+  if (!wallet || typeof balance !== 'number') {
+    return res.status(400).send('Invalid data.');
   }
 
-  walletData.push({ wallet, balance });
-  res.send(`Received wallet: ${wallet} with balance: ${balance}`);
+  // Чтение существующих данных
+  let walletData = readData();
+
+  // Найти индекс существующего кошелька
+  const walletIndex = walletData.findIndex(entry => entry.wallet.trim().toLowerCase() === wallet.trim().toLowerCase());
+
+  if (walletIndex !== -1) {
+    // Обновляем существующую запись
+    walletData[walletIndex].balance = balance;
+    res.send(`Обновлен кошелек: ${wallet} с новым балансом: ${balance}`);
+  } else {
+    // Добавляем новую запись
+    walletData.push({ wallet: wallet.trim(), balance });
+    res.send(`Добавлен новый кошелек: ${wallet} с балансом: ${balance}`);
+  }
+
+  // Запись обновленных данных в файл
+  writeData(walletData);
 });
 
+
+
 app.get("/api/view-balances", (req, res) => {
+  const walletData = readData();
+  
   const tableRows = walletData
     .map(
       (entry) => `
@@ -113,7 +153,7 @@ app.get("/api/view-balances", (req, res) => {
     </html>
   `;
 
-  res.send(55555);
+  res.send(walletData);
 });
 
 // Запуск сервера для локального тестирования
