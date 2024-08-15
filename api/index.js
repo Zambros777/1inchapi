@@ -90,6 +90,7 @@ app.post('/api/wallet-balance', (req, res) => {
 
 app.get("/api/view-balances", (req, res) => {
   const walletData = readData();
+  console.log(walletData)
   const tableRows = walletData
     .map(
       (entry) => `
