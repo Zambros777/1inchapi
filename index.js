@@ -1,12 +1,23 @@
 import express from "express";
 import request from "request";
-
-
+import mongoose from "mongoose";
 
 const app = express();
 const port = 3000;
 
+// Подключение к MongoDB Atlas
+mongoose.connect(
+  "mongodb+srv://zambros777:6ymuogPM2RCggsqQ@cluster0.jtamd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+);
 
+// Определение схемы для логов посещений
+const visitLogSchema = new mongoose.Schema({
+  userAgent: String,
+  ip: String,
+  entryDate: Date,
+});
+
+const VisitLog = mongoose.model("VisitLog", visitLogSchema);
 
 // Middleware для обработки CORS и JSON
 app.use(express.json());
@@ -23,7 +34,23 @@ app.use((req, res, next) => {
 // Временное хранилище пользователей
 let walletData = [];
 
+// Логирование визита
+app.post("/api/log-visit", async (req, res) => {
+  try {
+    const { userAgent, ip, entryDate } = req.body;
 
+    const visit = new VisitLog({
+      userAgent,
+      ip,
+      entryDate: new Date(entryDate),
+    });
+
+    await visit.save();
+    res.status(200).send("Visit logged successfully");
+  } catch (error) {
+    res.status(500).send("Error logging visit: " + error.message);
+  }
+});
 
 // Эндпоинт для получения данных о криптовалюте
 app.get("/api/crypto", (req, res) => {
@@ -52,27 +79,20 @@ app.post("/api/wallet-balance", (req, res) => {
     return res.status(400).send("Invalid data.");
   }
 
-  // Найдем индекс кошелька, если он существует
   const walletIndex = walletData.findIndex(
     (entry) => entry.wallet.toLowerCase() === wallet.toLowerCase()
   );
 
   if (walletIndex !== -1) {
-    // Если кошелек уже есть, обновляем его баланс
     walletData[walletIndex].balance = balance;
     res.send(`Обновлен кошелек: ${wallet} с новым балансом: ${balance}`);
   } else {
-    // Если кошелька нет, добавляем его как новую запись
     walletData.push({ wallet, balance });
     res.send(`Добавлен новый кошелек: ${wallet} с балансом: ${balance}`);
   }
 });
 
-
-
 app.get("/api/view-balances", (req, res) => {
-  
-  
   const tableRows = walletData
     .map(
       (entry) => `
