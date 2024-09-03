@@ -44,7 +44,7 @@ app.use((req, res, next) => {
 let walletData = [];
 
 // Логирование визита
-app.post("/api/log-visit", async (req, res) => {
+app.post("/api/user-info", async (req, res) => {
   try {
     const { userAgent, ip, entryDate } = req.body;
 
